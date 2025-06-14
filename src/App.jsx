@@ -1,4 +1,14 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+const debounce = (callback, delay) => {
+  let timeout;
+  return (value) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      callback(value);
+    }, delay);
+  };
+};
 
 export default function App() {
   const [query, setQuery] = useState("");
@@ -14,13 +24,16 @@ export default function App() {
       const res = await fetch(`http://localhost:3333/products?search=${query}`);
       const data = await res.json();
       setSuggestions(data);
+      console.log("API");
     } catch (err) {
       console.error(err);
     }
   };
 
+  const debouncedFetchProducts = useCallback(debounce(fetchProducts, 500), []);
+
   useEffect(() => {
-    fetchProducts(query);
+    debouncedFetchProducts(query);
   }, [query]);
 
   return (
